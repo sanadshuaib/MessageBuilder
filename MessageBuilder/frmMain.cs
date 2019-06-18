@@ -18,7 +18,7 @@ namespace MessageBuilder
         public frmMain()
         {
             InitializeComponent();
-            FileChecker.filepath = @"d:/json.txt";
+            FileChecker.filepath = @"d:/messages.json";
         }
 
         IMessageReader reader;
@@ -36,20 +36,8 @@ namespace MessageBuilder
             dgMessages.DataSource = _public_list;
         }
 
-        private void BtnCancel_Click(object sender, EventArgs e)
+        void WriteMessages()
         {
-            this.Close();
-        }
-
-        private void BtnSave_Click(object sender, EventArgs e)
-        {
-            if (TextChecker.TextIsEmpty(txtMessageCode))
-                return ;
-            if(TextChecker.TextIsEmpty(txtMessageTitle))
-                return;
-            if(TextChecker.TextIsEmpty(txtMessageBody))
-                return;
-
             MessageTypes mType;
             Enum.TryParse<MessageTypes>(cboMessageType.SelectedValue.ToString(), out mType);
 
@@ -71,20 +59,15 @@ namespace MessageBuilder
             cboMessageType.SelectedIndex = 0;
         }
 
-        private void FrmMain_Load(object sender, EventArgs e)
+        void WriteAllMessages()
         {
-            ReadMessages();
-        }
-
-        private void btnSaveAll_Click(object sender, EventArgs e)
-        {
-            List<MessageHandler> messages = new List<MessageHandler>() ;
+            List<MessageHandler> messages = new List<MessageHandler>();
             MessageTypes mType;
-            
+
             foreach (DataGridViewRow row in dgMessages.Rows)
             {
-                if (!row.IsNewRow && 
-                    !string.IsNullOrEmpty(row.Cells[0].Value+""))
+                if (!row.IsNewRow &&
+                    !string.IsNullOrEmpty(row.Cells[0].Value + ""))
                 {
                     if (row.Cells["messageTypeDataGridViewTextBoxColumn"].Value is null)
                     {
@@ -106,6 +89,41 @@ namespace MessageBuilder
             writer = new MessageWriter(messages);
             writer.WriteMessagesAtOnce();
             ReadMessages();
+        }
+
+        bool ValidMessageData()
+        {
+            if (TextChecker.TextIsEmpty(txtMessageCode))
+                return false;
+            if (TextChecker.TextIsEmpty(txtMessageTitle))
+                return false;
+            if (TextChecker.TextIsEmpty(txtMessageBody))
+                return false;
+            return true;
+        }
+
+        private void BtnCancel_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void BtnSave_Click(object sender, EventArgs e)
+        {
+            if (ValidMessageData())
+            {
+                WriteMessages();
+            }
+            
+        }
+
+        private void FrmMain_Load(object sender, EventArgs e)
+        {
+            ReadMessages();
+        }
+
+        private void btnSaveAll_Click(object sender, EventArgs e)
+        {
+            WriteAllMessages();
         }
 
         private void btnRefresh_Click(object sender, EventArgs e)
